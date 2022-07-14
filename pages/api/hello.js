@@ -12,9 +12,7 @@ export default async function handler(req, res) {
   const nameInputUserName = 'username'
   const nameInputPassword = 'password'
 
-  const browser = await puppeteer.launch({
-    headless: false,
-  });
+  const browser = await puppeteer.launch();
 
   const page = await browser.newPage();
   await page.goto(loginPage);
