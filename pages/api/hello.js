@@ -1,35 +1,40 @@
-import chromium from "chrome-aws-lambda"
+const puppeteer = require('puppeteer');
+const cheerio = require('cheerio');
+const chrome = require('chrome-aws-lambda');
 
 export default async function handler(req, res) {
-  const usernameBlaze = 'blazeappbottest1995@gmail.com'
-  const passwordBlaze = 'Wghd$85a'
 
-  const baseSite = "https://blaze.com/pt/"
-  const loginPage = 'https://blaze.com/pt/?modal=auth&tab=login'
-  const gameCrashUrl = 'https://blaze.com/pt/games/crash'
+  console.log(await chrome.executablePath)
 
-  const nameInputUserName = 'username'
-  const nameInputPassword = 'password'
-
-  const browser = await chromium.puppeteer.launch({
-    executablePath: await chromium.executablePath,
-  });
+  const browser = await puppeteer.launch(
+    process.env.NODE_ENV === 'production'
+      ? {
+        args: chrome.args,
+        executablePath: await chrome.executablePath,
+        headless: chrome.headless,
+        defaultViewport: chromium.defaultViewport
+      }
+      : {
+        headless: false,
+        args: chrome.args,
+        executablePath: await chrome.executablePath
+      }
+  );
 
   const page = await browser.newPage();
-  await page.goto(loginPage);
-  console.log(`Into page ${loginPage}`)
+  page.setUserAgent('Opera/9.80 (J2ME/MIDP; Opera Mini/5.1.21214/28.2725; U; ru) Presto/2.8.119 Version/11.10');
+  await page.goto(`https://blaze.com/pt`);
 
-  await page.type(`input[name=${nameInputUserName}]`, usernameBlaze)
-  await page.type(`input[name=${nameInputPassword}]`, passwordBlaze)
-  await page.keyboard.press('Enter')
-  console.log("Login realizado com sucesso")
+  // let content = await page.content();
+  // const $ = cheerio.load(content);
+  // $.prototype.exists = function (selector) {
+  //   return this.find(selector).length > 0;
+  // }
 
-  await page.waitForNavigation()
 
-  await page.goto(gameCrashUrl)
-  console.log(`Into page ${gameCrashUrl}`)
+  // await browser.close();
 
-  browser.close()
-
-  res.status(200).json({ name: 'John Doe' })
+  res.statusCode = 200
+  res.setHeader('Content-Type', 'application/json')
+  res.end(JSON.stringify({ id: 1 }))
 }
